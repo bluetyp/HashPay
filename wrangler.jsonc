@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "hashpay",
+  "account_id": "78488d7eaec03f4bbde972c395ba559d",
   "main": "src/index.ts",
   "compatibility_date": "2026-06-14",
   "compatibility_flags": ["nodejs_compat"],
@@ -20,6 +21,7 @@
     {
       "binding": "DB",
       "database_name": "hashpay",
+      "database_id": "5ec67776-25d1-4878-9345-c205d8154579",
       "migrations_dir": "src/server/db/d1/migrations"
     }
   ],
@@ -39,5 +41,11 @@
   },
   "triggers": {
     "crons": ["* * * * *"]
-  }
+  },
+  "routes": [
+    {
+      "pattern": "pay.zheqitech.com",
+      "custom_domain": true
+    }
+  ]
 }
