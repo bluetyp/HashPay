@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onUnmounted, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import { useMessage } from "naive-ui";
 import PaymentDetails from "@/app/components/PaymentDetails.vue";
@@ -13,6 +13,7 @@ import { formatDisplayAmount as formatAmount } from "@/app/utils/format";
 import { copyText } from "@/app/utils/clipboard";
 import { formatTime } from "@/app/utils/format";
 import { useI18n } from "@/app/i18n";
+import zheqiLogoMark from "@/app/assets/zheqi-logo-mark.svg";
 
 const route = useRoute();
 const message = useMessage();
@@ -30,6 +31,14 @@ const {
   returnToMerchant,
   selectPayment,
 } = useCheckout(orderId, message);
+const originalTitle = document.title;
+
+watchEffect(() => {
+  document.title = `${checkout.value?.merchant.name || t("checkout.brand")} · ${t("checkout.secure_cashier")}`;
+});
+onUnmounted(() => {
+  document.title = originalTitle;
+});
 
 function shortText(value: unknown, start = 10, end = 8) {
   const text = String(value || "");
@@ -83,8 +92,11 @@ function hasReturnUrl(order: Order) {
     <n-layout-header class="checkout-topbar">
       <div class="checkout-topbar-inner">
         <div class="checkout-brand">
-          <strong>{{ t('app.name') }}</strong>
-          <span>{{ t('checkout.cashier') }}</span>
+          <img class="checkout-brand-mark" :src="zheqiLogoMark" alt="" />
+          <div class="checkout-brand-copy">
+            <strong>{{ checkout?.merchant.name || t('checkout.brand') }}</strong>
+            <span>{{ t('checkout.secure_cashier') }}</span>
+          </div>
         </div>
         <LocaleSwitch />
       </div>
@@ -108,7 +120,7 @@ function hasReturnUrl(order: Order) {
             type="circle"
             :percentage="remainingPercentage(checkout.order)"
             :stroke-width="6"
-            color="#16a34a"
+            color="#2563eb"
             rail-color="#e5e7eb"
           >
             <div class="checkout-countdown-content">
@@ -245,6 +257,14 @@ function hasReturnUrl(order: Order) {
         </div>
       </section>
     </n-layout-content>
+
+    <footer class="checkout-trust">
+      <svg aria-hidden="true" viewBox="0 0 24 24">
+        <path d="M12 3 5.5 5.8v5.6c0 4.1 2.7 7.8 6.5 9.1 3.8-1.3 6.5-5 6.5-9.1V5.8L12 3Z" />
+        <path d="m9.3 12 1.8 1.8 3.8-4" />
+      </svg>
+      <span>{{ checkout && expired(checkout.order) ? t('checkout.closed_note') : t('checkout.secure_note') }}</span>
+    </footer>
 
     <ReviewModal
       v-model:show="reviewVisible"
